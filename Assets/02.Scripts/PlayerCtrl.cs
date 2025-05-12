@@ -7,8 +7,19 @@ public class PlayerCtrl : MonoBehaviour
     private Transform tr; //위치
     private Transform camTr; // 카메라 위치
 
+    private GameObject Monster;
+
+    private readonly float initHp = 100.0f;
+    public float currHp;
+
     public float moveSpeed = 5.0f; // 이동 속도
     public float rotSpeed = 300.0f; // 회전 속도
+
+
+    public delegate void PlayerDieHandler();
+    public static event PlayerDieHandler OnPlayerDie;
+
+
 
     void Start()
     {
@@ -17,6 +28,9 @@ public class PlayerCtrl : MonoBehaviour
         anim = GetComponent<Animation>();
         anim.CrossFade("Idle", 0.25f);
         camTr = Camera.main.transform;
+        currHp = initHp;
+
+        Monster = GameObject.FindWithTag("MONSTER");
 
     }
 
@@ -59,5 +73,30 @@ public class PlayerCtrl : MonoBehaviour
     }
 
 
-    
+    private void OnTriggerEnter(Collider other)
+    {
+
+        if (other.CompareTag("PUNCH"))
+        {
+            currHp -= 10;
+
+            if (currHp <= 0)
+            {
+                PlayerDie();
+            }
+        }
+    }
+
+    void PlayerDie()
+    {
+        GameObject[] monsters = GameObject.FindGameObjectsWithTag("MONSTER");
+
+        foreach (var monster in monsters)
+        {
+            monster.SendMessage("OnPlayerDie", SendMessageOptions.DontRequireReceiver);
+        }
+
+        GameManager.instance.IsGameOver = true;
+        GameManager.instance.SaveScore();  // 점수 저장
+    }
 }

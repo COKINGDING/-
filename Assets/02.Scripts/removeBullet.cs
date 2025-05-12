@@ -21,5 +21,9 @@ public class removeBullet : MonoBehaviour
             Destroy(spark, 0.3f);
             Destroy(coll.gameObject); //ªË¡¶
         }
+        else if (this.CompareTag("MONSTER") && coll.collider.CompareTag("BULLET"))
+        {
+            Destroy(coll.gameObject);
+        }
     }
 }
